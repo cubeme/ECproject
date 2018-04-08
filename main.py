@@ -25,5 +25,6 @@ print(benchmark_sequence)
 
 population = initialize_population(args.pop_size, len(benchmark_sequence))
 
+
 for ind in population:
     print(ind)

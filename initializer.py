@@ -14,30 +14,46 @@ def initialize_population(pop_size, sequence_length):
 
 
 def create_individual(new_individual, sequence_length, possible_steps):
+    # make an empty list for steps that led to clashes
+    steps_that_clashed = [[] for _ in range(sequence_length)]
+
     # first step is always 1
     # and sequence of length n needs n-1 steps
-    if len(new_individual) == sequence_length - 2:
-        return new_individual
+    # --> an individual has length n-2
+    while len(new_individual) < sequence_length - 2:
+        current_length = len(new_individual)
 
-    # check if there are any steps left
-    if not possible_steps:
-        # new possible steps but remove step before last from possible steps (since it lead nowhere)
-        possible_steps = [0, 1, 2]
-        possible_steps.remove(new_individual[-1])
-        # remove step before last (backtrack once more)
-        del new_individual[-1]
-        # try again with all step options
-        return create_individual(new_individual, sequence_length, possible_steps)
+        # check if there are any possible steps left
+        if not possible_steps:
+            # since there are no possible steps left, we need to backtrack more than 1 step
+            i = current_length
+            # go back to where there are still step options (= backtrack point)
+            while len(steps_that_clashed[i]) == 3:
+                steps_that_clashed[i] = []
+                i -= 1
 
-    step = random.SystemRandom().choice(possible_steps)
-    new_individual.append(step)
+            # new possible steps
+            possible_steps = [0, 1, 2]
+            # if steps have already been tried for this position (and have failed), remove them from possible steps
+            if not steps_that_clashed[i]:
+                for s in steps_that_clashed[i]:
+                    possible_steps.remove(s)
 
-    if check_clash(new_individual):
-        # and remove the step that led to the clash
-        possible_steps.remove(step)
-        # there was a clash, so remove the last step (backtrack)
-        del new_individual[-1]
-        return create_individual(new_individual, sequence_length, possible_steps)
+            # go back to backtrack point and remove all steps after that
+            new_individual = new_individual[:current_length - i]
 
-    else:
-        return create_individual(new_individual, sequence_length, [0, 1, 2])
+        # choose random new step
+        step = random.SystemRandom().choice(possible_steps)
+        new_individual.append(step)
+
+        if check_clash(new_individual):
+            # and remove the step that led to the clash
+            possible_steps.remove(step)
+
+            steps_that_clashed[len(new_individual)].append(step)
+            # there was a clash, so remove the last step (backtrack)
+            del new_individual[-1]
+        else:
+            possible_steps = [0, 1, 2]
+
+    return new_individual
