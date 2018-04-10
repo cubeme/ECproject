@@ -3,7 +3,7 @@ import random
 
 def create_child(competitors_with_fitness):
 
-    child = list()
+    child = [None]*len(competitors_with_fitness(1, 2)) # Predefined size
 
     crossover_point = random.randint(3, len(competitors_with_fitness(1, 2)))  # XO point ranges from 4th element
     # to size of individual
