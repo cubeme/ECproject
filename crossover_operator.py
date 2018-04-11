@@ -13,7 +13,7 @@ def crossover(competitors_with_fitness, clash_limit, crossover_limit):
             checker = check_clash(children[i])  # checks for clash
 
             if checker is True:  # if there was clash, adds one unit to clashed numbers
-                clashed = +1
+                clashed += 1
             else:
                 break  # if there was not a clash, gets out of while loop
 
