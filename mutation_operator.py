@@ -12,7 +12,7 @@ def mutation_operator(individual, in_plane_prob, out_of_plane_prob, crank_prob, 
     clashed = 0
 
     while clashed_limit != clashed:  # applies mutation while there is still clash
-        if random_number <= in_plane_prob:  # accumulated probabilities are if conditions: one if 4 is applied
+        if random_number <= in_plane_prob:  # cumulative probabilities are if conditions: one if 4 is applied
             mutated = in_plane.in_plane_mutation(individual)
         elif in_plane_prob < random_number and random_number <= (in_plane_prob + out_of_plane_prob):
             mutated = out_of_plane.out_of_plane(individual)
