@@ -5,6 +5,7 @@ from fitness_evaluator import evaluate_fitness
 from fitness_evaluator import get_best_individual
 from initializer import initialize_population
 from mutation_operator import mutate
+from plotter import plot_individual
 from read_benchmark_sequences import read_benchmark_file
 from selector import select_random_numbers
 from tournament_holder import hold_tournament
@@ -123,3 +124,5 @@ for individual, mutant in zip(individuals_to_mutate, mutated_individuals):
 print("new population")
 for ind in population:
     print(ind)
+
+plot_individual(best_individual[1], benchmark_sequence)
