@@ -1,32 +1,46 @@
 import random
-import in_plane
-import kink_movement
-import out_of_plane
-import crank_shaft_rotation
+
 from clash_checker import check_clash
+from mutations import in_plane_rotation, out_of_plane_rotation, crank_shaft_rotation, kink_movement
 
 
-def mutation_operator(individual, in_plane_prob, out_of_plane_prob, crank_prob, kink_prob, clashed_limit):
-    random_number = random.random()
-    mutated = list()
-    clashed = 0
+def mutate(individuals_to_mutate, in_plane_prob, out_of_plane_prob, crank_prob, kink_prob, clash_limit):
+    mutated_individuals = list()
 
-    while clashed_limit != clashed:  # applies mutation while there is still clash
-        if random_number <= in_plane_prob:  # cumulative probabilities are if conditions: one if 4 is applied
-            mutated = in_plane.in_plane_mutation(individual)
-        elif in_plane_prob < random_number and random_number <= (in_plane_prob + out_of_plane_prob):
-            mutated = out_of_plane.out_of_plane(individual)
-        elif (out_of_plane_prob + out_of_plane_prob) < random_number and \
-                random_number <= (in_plane_prob + out_of_plane_prob + crank_prob):
-            mutated = crank_shaft_rotation.crank_shaft_rotation(individual)
-        elif (in_plane_prob + out_of_plane_prob + crank_prob) < random_number and \
-                random_number <= (in_plane_prob + out_of_plane_prob + crank_prob + kink_prob):
-            mutated = kink_movement.kink_movement(individual)
+    for individual in individuals_to_mutate:
+        clashed = 0
+        # cumulative probabilities
+        cumulative_probabilities = [in_plane_prob, in_plane_prob + out_of_plane_prob,
+                                    in_plane_prob + out_of_plane_prob + crank_prob,
+                                    in_plane_prob + out_of_plane_prob + crank_prob + kink_prob]
 
-        if check_clash(mutated) == True:  # if clashed, set mutated as original one, and undergo mutation again.
+        # applies mutation until mutant does not show any clashes
+        while clash_limit != clashed:
+            random_number = random.SystemRandom().uniform(0, 1.0)
 
-            mutated = individual
-            clashed += 1
-        else:  # if there was not any clash, break while loop and return mutated
-            break
-    return mutated
+            # do in plane rotation
+            if random_number <= cumulative_probabilities[0]:
+                mutant = in_plane_rotation(individual)
+
+            # do out of plane rotation
+            elif cumulative_probabilities[0] < random_number <= cumulative_probabilities[1]:
+                mutant = out_of_plane_rotation(individual)
+
+            # do crank shaft mutation
+            elif cumulative_probabilities[1] < random_number <= cumulative_probabilities[2]:
+                mutant = crank_shaft_rotation(individual)
+
+            # do kink movement
+            elif cumulative_probabilities[2] < random_number <= cumulative_probabilities[3]:
+                mutant = kink_movement(individual)
+
+            # if clash occurred, try again to mutate individual
+            if check_clash(mutant):
+                mutant = individual
+                clashed += 1
+            else:
+                break
+
+        mutated_individuals.append(mutant)
+
+    return mutated_individuals

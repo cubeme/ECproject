@@ -1,10 +1,12 @@
 import argparse
 
+from crossover_operator import crossover
+from fitness_evaluator import get_best_individual
 from initializer import initialize_population
 from read_benchmark_sequences import read_benchmark_file
 from selector import select_random_numbers
 from tournament_holder import hold_tournament
-from fitness_evaluator import get_best_individual
+from mutation_operator import mutate
 
 # there are three input arguments:
 # benchmark sequence number: 0 = 20 amino acids, 1 = 24 amino acids, 2 = 25 amino acids, 3 = 36 amino acids,
@@ -21,6 +23,14 @@ parser.add_argument('mut_lambda', metavar='l', type=int, nargs='?', help='Mutati
 parser.add_argument('iterations', metavar='i', type=int, nargs='?',
                     help='The number of generations the algorithm will run.')
 args = parser.parse_args()
+
+clash_limit = 10
+m_sys_crossover = 10
+crossover_rate = 0.8
+in_plane_prob = 0.4
+out_of_plane_prob = 0.2
+crank_prob = 0.1
+kink_prob = 0.3
 
 benchmark_sequence = read_benchmark_file()[args.benchmark_sequence]
 
@@ -60,16 +70,38 @@ print("worst two")
 print(worst_competitors)
 
 # do crossover with parents
-
+children = crossover(parents, clash_limit, m_sys_crossover, crossover_rate, benchmark_sequence)
 # if one of children has better fitness than best individual, replace it
+for fitness_and_child in children:
+    if fitness_and_child[0] > best_individual[0]:
+        best_individual[0] = fitness_and_child[0]
+        best_individual[1] = fitness_and_child[1]
+
+# replace individuals
+index = population.index(worst_competitors[0])
+population.insert(index, children[0][1])
+index = population.index(worst_competitors[1])
+population.insert(index, children[1][1])
 
 random_numbers_mutation = select_random_numbers(args.mut_lambda, args.pop_size)
 
 individuals_to_mutate = list()
 
 for index in random_numbers_mutation:
+
+    # do not allow best individual to be mutated
+    if population[index] == best_individual[1]:
+        # select new random number
+        random_alt = select_random_numbers(1, args.pop_size)[0]
+        while random_alt == index:
+            random_alt = select_random_numbers(1, args.pop_size)[0]
+        individuals_to_mutate.append(population[random_alt])
+
     individuals_to_mutate.append(population[index])
 
 # do mutation
+mutated_individuals = mutate(individuals_to_mutate, in_plane_prob, out_of_plane_prob, crank_prob, kink_prob, clash_limit)
 
-# do not allow best individual to be mutated
+print("new population")
+for ind in population:
+    print(ind)
