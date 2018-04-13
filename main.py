@@ -1,12 +1,13 @@
 import argparse
 
 from crossover_operator import crossover
+from fitness_evaluator import evaluate_fitness
 from fitness_evaluator import get_best_individual
 from initializer import initialize_population
+from mutation_operator import mutate
 from read_benchmark_sequences import read_benchmark_file
 from selector import select_random_numbers
 from tournament_holder import hold_tournament
-from mutation_operator import mutate
 
 # there are three input arguments:
 # benchmark sequence number: 0 = 20 amino acids, 1 = 24 amino acids, 2 = 25 amino acids, 3 = 36 amino acids,
@@ -73,14 +74,19 @@ print(worst_competitors)
 children = crossover(parents, clash_limit, m_sys_crossover, crossover_rate, benchmark_sequence)
 # if one of children has better fitness than best individual, replace it
 for fitness_and_child in children:
-    if fitness_and_child[0] > best_individual[0]:
+    if fitness_and_child[0] < best_individual[0]:
         best_individual[0] = fitness_and_child[0]
         best_individual[1] = fitness_and_child[1]
 
 # replace individuals
+# right now there cannot be multiple copies of same individual in the tournament
+# if this changes, we have to pay attention when removing the competitors from the population
 index = population.index(worst_competitors[0])
+del population[index]
 population.insert(index, children[0][1])
+
 index = population.index(worst_competitors[1])
+del population[index]
 population.insert(index, children[1][1])
 
 random_numbers_mutation = select_random_numbers(args.mut_lambda, args.pop_size)
@@ -100,7 +106,19 @@ for index in random_numbers_mutation:
     individuals_to_mutate.append(population[index])
 
 # do mutation
-mutated_individuals = mutate(individuals_to_mutate, in_plane_prob, out_of_plane_prob, crank_prob, kink_prob, clash_limit)
+mutated_individuals = mutate(individuals_to_mutate, in_plane_prob, out_of_plane_prob, crank_prob, kink_prob,
+                             clash_limit)
+
+for individual, mutant in zip(individuals_to_mutate, mutated_individuals):
+    fitness = evaluate_fitness(mutant, benchmark_sequence)
+    if fitness < best_individual[0]:
+        best_individual[0] = fitness
+        best_individual[1] = mutant
+
+    # replace individuals
+    index = population.index(individual)
+    del population[index]
+    population.insert(index, mutant)
 
 print("new population")
 for ind in population:

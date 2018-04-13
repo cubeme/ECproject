@@ -2,9 +2,13 @@ import random
 
 
 def select_random_numbers(number_to_be_selected, pool_size):
+    pool = list(range(0, pool_size))
     random_numbers = list()
 
     for i in range(number_to_be_selected):
-        random_numbers.append(random.randint(0, pool_size - 1))
+        rand_number = random.choice(pool)
+        random_numbers.append(rand_number)
+        # cannot contain same number twice
+        pool.remove(rand_number)
 
     return random_numbers
