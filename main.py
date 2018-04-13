@@ -95,14 +95,15 @@ random_numbers_mutation = select_random_numbers(args.mut_lambda, args.pop_size)
 individuals_to_mutate = list()
 
 for index in random_numbers_mutation:
-
     # do not allow best individual to be mutated
     if population[index] == best_individual[1]:
         # select new random number
         random_alt = select_random_numbers(1, args.pop_size)[0]
-        while random_alt == index:
+        while (random_alt == index) or (random_alt in random_numbers_mutation):
             random_alt = select_random_numbers(1, args.pop_size)[0]
+        # add this individual to the mutation list
         individuals_to_mutate.append(population[random_alt])
+        continue
 
     individuals_to_mutate.append(population[index])
 

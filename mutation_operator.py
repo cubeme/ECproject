@@ -1,3 +1,4 @@
+import copy
 import random
 
 from clash_checker import check_clash
@@ -8,6 +9,7 @@ def mutate(individuals_to_mutate, in_plane_prob, out_of_plane_prob, crank_prob, 
     mutated_individuals = list()
 
     for individual in individuals_to_mutate:
+        mutant = copy.copy(individual)
         clashed = 0
         # cumulative probabilities
         cumulative_probabilities = [in_plane_prob, in_plane_prob + out_of_plane_prob,
@@ -20,23 +22,23 @@ def mutate(individuals_to_mutate, in_plane_prob, out_of_plane_prob, crank_prob, 
 
             # do in plane rotation
             if random_number <= cumulative_probabilities[0]:
-                mutant = in_plane_rotation(individual)
+                mutant = in_plane_rotation(mutant)
 
             # do out of plane rotation
             elif cumulative_probabilities[0] < random_number <= cumulative_probabilities[1]:
-                mutant = out_of_plane_rotation(individual)
+                mutant = out_of_plane_rotation(mutant)
 
             # do crank shaft mutation
             elif cumulative_probabilities[1] < random_number <= cumulative_probabilities[2]:
-                mutant = crank_shaft_rotation(individual)
+                mutant = crank_shaft_rotation(mutant)
 
             # do kink movement
             elif cumulative_probabilities[2] < random_number <= cumulative_probabilities[3]:
-                mutant = kink_movement(individual)
+                mutant = kink_movement(mutant)
 
             # if clash occurred, try again to mutate individual
             if check_clash(mutant):
-                mutant = individual
+                mutant = copy.copy(individual)
                 clashed += 1
             else:
                 break

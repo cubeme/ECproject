@@ -28,6 +28,7 @@ def plot_individual(individual, hp_sequence):
             y_min = coord.y
 
     fig, ax = plt.subplots()
+    plt.axis('scaled')
     ax.set_axis_off()
     ax.set_xlim(x_min - 1, x_max + 1)
     ax.set_ylim(y_min - 1, y_max + 1)
