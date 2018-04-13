@@ -82,6 +82,10 @@ for fitness_and_child in children:
 # replace individuals
 # right now there cannot be multiple copies of same individual in the tournament
 # if this changes, we have to pay attention when removing the competitors from the population
+
+print("parents")
+print(parents)
+
 index = population.index(worst_competitors[0])
 del population[index]
 population.insert(index, children[0][1])
@@ -93,10 +97,13 @@ population.insert(index, children[1][1])
 random_numbers_mutation = select_random_numbers(args.mut_lambda, args.pop_size)
 
 individuals_to_mutate = list()
+print(best_individual[1])
+print(population.index(best_individual[1]))
 
 for index in random_numbers_mutation:
+
     # do not allow best individual to be mutated
-    if population[index] == best_individual[1]:
+    if index == population.index(best_individual[1]):
         # select new random number
         random_alt = select_random_numbers(1, args.pop_size)[0]
         while (random_alt == index) or (random_alt in random_numbers_mutation):

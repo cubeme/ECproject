@@ -90,11 +90,11 @@ def kink_movement(individual):
     # randomly choose one of the kinks
     mutation_point = random.choice(kink_indices)
 
-    # 020 to 012
+    # 020 to 101
     if individual[mutation_point] == 0 and individual[mutation_point + 1] == 2 and individual[mutation_point + 2] == 0:
-        individual[mutation_point] = 0
-        individual[mutation_point + 1] = 1
-        individual[mutation_point + 2] = 2
+        individual[mutation_point] = 1
+        individual[mutation_point + 1] = 0
+        individual[mutation_point + 2] = 1
 
     # 021 to 102
     elif individual[mutation_point] == 0 and individual[mutation_point + 1] == 2 and individual[

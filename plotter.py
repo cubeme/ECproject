@@ -14,7 +14,6 @@ def plot_individual(individual, hp_sequence):
     y_min = 0
 
     for coord in best_coordinates:
-        print("{} {}".format(coord.x, coord.y))
         if coord.x > x_max:
             x_max = coord.x
 
