@@ -8,18 +8,19 @@ from mutations import in_plane_rotation, out_of_plane_rotation, crank_shaft_rota
 def mutate(individuals_to_mutate, in_plane_prob, out_of_plane_prob, crank_prob, kink_prob, clash_limit):
     mutated_individuals = list()
 
+    # cumulative probabilities
+    cumulative_probabilities = [in_plane_prob, in_plane_prob + out_of_plane_prob,
+                                in_plane_prob + out_of_plane_prob + crank_prob,
+                                in_plane_prob + out_of_plane_prob + crank_prob + kink_prob]
+
     for individual in individuals_to_mutate:
         mutant = copy.copy(individual)
         clashed = 0
-        # cumulative probabilities
-        cumulative_probabilities = [in_plane_prob, in_plane_prob + out_of_plane_prob,
-                                    in_plane_prob + out_of_plane_prob + crank_prob,
-                                    in_plane_prob + out_of_plane_prob + crank_prob + kink_prob]
+
+        random_number = random.SystemRandom().uniform(0, 1.0)
 
         # applies mutation until mutant does not show any clashes
         while clash_limit != clashed:
-            random_number = random.SystemRandom().uniform(0, 1.0)
-
             # do in plane rotation
             if random_number <= cumulative_probabilities[0]:
                 mutant = in_plane_rotation(mutant)

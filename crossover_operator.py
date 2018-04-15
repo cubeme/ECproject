@@ -57,7 +57,7 @@ def crossover(parents, clash_limit, m_sys_crossover, crossover_rate, hp_sequence
     ranked_children.sort(key=operator.itemgetter(0))
 
     # return two best children
-    return ranked_children[0:2]
+    return ranked_children[:2]
 
 
 def create_children(parents):
