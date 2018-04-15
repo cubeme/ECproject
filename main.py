@@ -26,111 +26,100 @@ parser.add_argument('iterations', metavar='i', type=int, nargs='?',
                     help='The number of generations the algorithm will run.')
 args = parser.parse_args()
 
-clash_limit = 10
+# set parameters
+clash_limit = 20
 m_sys_crossover = 10
 crossover_rate = 0.8
-in_plane_prob = 0.4
-out_of_plane_prob = 0.2
+in_plane_prob = 0.3
+out_of_plane_prob = 0.3
 crank_prob = 0.1
 kink_prob = 0.3
 
-benchmark_sequence = read_benchmark_file()[args.benchmark_sequence]
+# get hp sequence: [total minimum energy, sequence]
+benchmark = read_benchmark_file()[args.benchmark_sequence]
 
-print(benchmark_sequence)
+print(benchmark[1])
 
-population = initialize_population(args.pop_size, len(benchmark_sequence))
+population = initialize_population(args.pop_size, len(benchmark[1]))
 
-# array that contains best fitness at [0] and the best individual at [1]
-best_individual = get_best_individual(population, benchmark_sequence)
+# list that contains best fitness at [0] and the corresponding individual at [1]
+best = get_best_individual(population, benchmark[1])
+best_fitness_value = best[0]
+best_individual = best[1]
 
-print("population")
-for ind in population:
-    print(ind)
+# do GA iterations
+iterations = 0
+while iterations < args.iterations and best_fitness_value > benchmark[0]:
+    # get random tournament competitors
+    random_tournament_indices = select_random_numbers(args.tournament_size, args.pop_size)
 
-print("best")
-print(best_individual)
+    competitors = list()
+    for index in random_tournament_indices:
+        competitors.append(population[index])
 
-random_numbers_tournament = select_random_numbers(args.tournament_size, args.pop_size)
+    # rank them according to fitness
+    ranked_competitors = hold_tournament(competitors, benchmark[1])
 
-competitors = list()
+    # take 2 best as parents
+    parents = [ranked_competitors[0][1], ranked_competitors[1][1]]
+    # get 2 worst individuals
+    worst_two = [ranked_competitors[-1][1], ranked_competitors[-2][1]]
 
-for index in random_numbers_tournament:
-    competitors.append(population[index])
-
-ranked_competitors = hold_tournament(competitors, benchmark_sequence)
-
-print("ranked")
-for ind in ranked_competitors:
-    print(ind)
-
-parents = [ranked_competitors[0][1], ranked_competitors[1][1]]
-worst_competitors = [ranked_competitors[-2][1], ranked_competitors[-1][1]]
-
-print("parents")
-print(parents)
-print("worst two")
-print(worst_competitors)
-
-# do crossover with parents
-children = crossover(parents, clash_limit, m_sys_crossover, crossover_rate, benchmark_sequence)
-# if one of children has better fitness than best individual, replace it
-for fitness_and_child in children:
-    if fitness_and_child[0] < best_individual[0]:
-        best_individual[0] = fitness_and_child[0]
-        best_individual[1] = fitness_and_child[1]
-
-# replace individuals
-# right now there cannot be multiple copies of same individual in the tournament
-# if this changes, we have to pay attention when removing the competitors from the population
-
-print("parents")
-print(parents)
-
-index = population.index(worst_competitors[0])
-del population[index]
-population.insert(index, children[0][1])
-
-index = population.index(worst_competitors[1])
-del population[index]
-population.insert(index, children[1][1])
-
-random_numbers_mutation = select_random_numbers(args.mut_lambda, args.pop_size)
-
-individuals_to_mutate = list()
-print(best_individual[1])
-print(population.index(best_individual[1]))
-
-for index in random_numbers_mutation:
-
-    # do not allow best individual to be mutated
-    if index == population.index(best_individual[1]):
-        # select new random number
-        random_alt = select_random_numbers(1, args.pop_size)[0]
-        while (random_alt == index) or (random_alt in random_numbers_mutation):
-            random_alt = select_random_numbers(1, args.pop_size)[0]
-        # add this individual to the mutation list
-        individuals_to_mutate.append(population[random_alt])
-        continue
-
-    individuals_to_mutate.append(population[index])
-
-# do mutation
-mutated_individuals = mutate(individuals_to_mutate, in_plane_prob, out_of_plane_prob, crank_prob, kink_prob,
-                             clash_limit)
-
-for individual, mutant in zip(individuals_to_mutate, mutated_individuals):
-    fitness = evaluate_fitness(mutant, benchmark_sequence)
-    if fitness < best_individual[0]:
-        best_individual[0] = fitness
-        best_individual[1] = mutant
+    # do crossover with parents
+    # returns list with [child_fitness, child] as elements
+    children = crossover(parents, clash_limit, m_sys_crossover, crossover_rate, benchmark[1])
 
     # replace individuals
-    index = population.index(individual)
-    del population[index]
-    population.insert(index, mutant)
+    # right now there cannot be multiple copies of same individual in the tournament
+    # if this changes, we have to pay attention when removing the competitors from the population
+    for fitness_and_child, one_worst_ind in zip(children, worst_two):
+        # get the index of the individual to be replaced
+        del_index = population.index(one_worst_ind)
+        # delete the individual
+        del population[del_index]
+        # insert the child at that index
+        population.insert(del_index, fitness_and_child[1])
+        # if that child has better fitness than the current best fitness, set new best individual
+        if fitness_and_child[0] < best_fitness_value:
+            best_fitness_value = fitness_and_child[0]
+            best_individual = population[del_index]
 
-print("new population")
-for ind in population:
-    print(ind)
+    # get random individuals for mutation
+    random_mutation_indices = select_random_numbers(args.mut_lambda, args.pop_size)
 
-plot_individual(best_individual[1], benchmark_sequence)
+    individuals_to_mutate = list()
+
+    # do not allow best individual to be mutated
+    best_index = population.index(best_individual)
+    if best_index in random_mutation_indices:
+        # select new random number
+        random_alt = select_random_numbers(1, args.pop_size)[0]
+        while (random_alt == index) or (random_alt in random_mutation_indices):
+            random_alt = select_random_numbers(1, args.pop_size)[0]
+
+        index_of_best_index = random_mutation_indices.index(best_index)
+        del random_mutation_indices[index_of_best_index]
+        random_mutation_indices.insert(index_of_best_index, random_alt)
+
+    for index in random_mutation_indices:
+        individuals_to_mutate.append(population[index])
+
+    # do mutation
+    mutated_individuals = mutate(individuals_to_mutate, in_plane_prob, out_of_plane_prob, crank_prob, kink_prob,
+                                 clash_limit)
+
+    # order in index list and mutated individual list should not have changed
+    for index, mutant in zip(random_mutation_indices, mutated_individuals):
+        fitness = evaluate_fitness(mutant, benchmark[1])
+        if fitness < best_fitness_value:
+            best_fitness_value = fitness
+            best_individual = mutant
+
+        # replace individuals
+        del population[index]
+        population.insert(index, mutant)
+
+    iterations += 1
+
+plot_individual(best_individual, benchmark[1])
+print("Energy value: {}".format(best_fitness_value))

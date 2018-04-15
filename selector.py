@@ -11,4 +11,4 @@ def select_random_numbers(number_to_be_selected, pool_size):
         # cannot contain same number twice
         pool.remove(rand_number)
 
-    return random_numbers
+    return sorted(random_numbers)
