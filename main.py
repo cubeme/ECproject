@@ -11,7 +11,7 @@ from read_benchmark_sequences import read_benchmark_file
 from selector import select_random_numbers
 from tournament_holder import hold_tournament
 
-# there are three input arguments:
+# there are four input arguments:
 # benchmark sequence number: 0 = 20 amino acids, 1 = 24 amino acids, 2 = 25 amino acids, 3 = 36 amino acids,
 # 4 = 48 amino acids, 5 = 50 amino acids, 6 = 60 amino acids, 7 = 64 amino acids,
 # population size n,
@@ -29,7 +29,7 @@ args = parser.parse_args()
 
 # set parameters
 clash_limit = 20
-m_sys_crossover = 20
+m_sys_crossover = 5
 crossover_rate = 0.8
 in_plane_prob = 0.3
 out_of_plane_prob = 0.3
@@ -118,17 +118,18 @@ while iterations < args.iterations and best_fitness_value > benchmark[0]:
 
     # order in index list and mutated individual list should not have changed
     for index, fitness, mutant in zip(random_mutation_indices, mutant_fitnesses, mutated_individuals):
-        if fitness < best_fitness_value:
-            best_fitness_value = fitness
-            best_individual = mutant
-
         # replace individuals
         del population[index]
         population.insert(index, mutant)
+        # check fitness
+        if fitness < best_fitness_value:
+            best_fitness_value = fitness
+            best_individual = mutant
 
     iterations += 1
 
 plot_individual(best_individual, benchmark[1])
 print("Energy value: {}".format(best_fitness_value))
 
-# todo: pioneer search, best-, average-, and worst-fitness every 10 generations, do measure and make diagrams, timing
+# todo: pioneer search, rotate crossover, best-, average-, and worst-fitness every 10 generations,
+# todo: do measures and make diagrams, timing
