@@ -18,7 +18,34 @@ def crossover(parents, clash_limit, m_sys_crossover, crossover_rate, hp_sequence
             children.extend(parents)
             continue
 
-        children = create_children(parents, clash_limit)
+        clashed = 0
+        new_children_created = 0
+
+        # try to make two children, stop when two children created or clash limit reached
+        while clashed < clash_limit and new_children_created < 2:
+            # create two new children with one crossover
+            new_children = create_children(parents)
+            # check if first child clashes
+            if not check_clash(new_children[0]):
+                children.append(new_children[0])
+                new_children_created += 1
+            else:
+                clashed += 1
+            # check if second child clashes
+            if not check_clash(new_children[1]):
+                children.append(new_children[1])
+                new_children_created += 1
+            else:
+                clashed += 1
+
+        # checks if two children were actually made
+        if not new_children_created == 2:
+            # no child was made, so just reuse both parents
+            if new_children_created == 0:
+                children.extend(parents)
+            # one child was made, so reuse first parent
+            if new_children_created == 1:
+                children.append(parents[0])
 
     # get fitness of all children
     ranked_children = list()
@@ -33,57 +60,14 @@ def crossover(parents, clash_limit, m_sys_crossover, crossover_rate, hp_sequence
     return ranked_children[:2]
 
 
-def create_children(parents, clash_limit):
-    clashed = 0
-    new_children = []
+def create_children(parents):
+    # choose random crossover point
+    crossover_point = random.randint(2, len(parents[0]) - 1)
 
-    while clashed < clash_limit:
-        # choose random crossover point
-        crossover_point = random.randint(2, len(parents[0]) - 1)
+    child1 = parents[0][:crossover_point]
+    child1.extend(parents[1][crossover_point:])
 
-        # create two children (rotate crossover point if necessary)
-        child1 = crossover_with_rotation(parents, 0, 1, crossover_point)
-        child2 = crossover_with_rotation(parents, 1, 0, crossover_point)
+    child2 = parents[1][:crossover_point]
+    child2.extend(parents[0][crossover_point:])
 
-        # check if children were made
-        if child1:
-            new_children.append(child1)
-            if len(new_children) == 2:
-                break
-        if child2:
-            new_children.append(child2)
-            if len(new_children) == 2:
-                break
-
-    # check how many children were made
-    if not new_children:
-        new_children.extend(parents)
-    if len(new_children) == 1:
-        new_children.append(parents[0])
-
-    return new_children
-
-
-def crossover_with_rotation(parents, p0, p1, crossover_point):
-    alt_directions = [0, 1, 2]
-    # get the value of the crossover point
-    crossover_direction = parents[p1][crossover_point]
-    alt_directions.remove(crossover_direction)
-    # create first part of child
-    child = parents[p0][:crossover_point]
-
-    # try to do crossover
-    while alt_directions:
-        child.append(crossover_direction)
-        child.extend(parents[p1][crossover_point + 1:])
-
-        # crossover didn't work, try again with but rotate second part
-        if check_clash(child):
-            del child[crossover_point:]
-            crossover_direction = random.choice(alt_directions)
-            alt_directions.remove(crossover_direction)
-        else:
-            return child
-
-    # not child could be made
-    return []
+    return [child1, child2]

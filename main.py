@@ -28,11 +28,11 @@ parser.add_argument('iterations', metavar='i', type=int, nargs='?',
 args = parser.parse_args()
 
 # set parameters
-clash_limit = 20
+clash_limit = 10
 m_sys_crossover = 5
 crossover_rate = 0.8
-in_plane_prob = 0.3
-out_of_plane_prob = 0.3
+in_plane_prob = 0.4
+out_of_plane_prob = 0.2
 crank_prob = 0.1
 kink_prob = 0.3
 
@@ -63,7 +63,7 @@ while iterations < args.iterations and best_fitness_value > benchmark[0]:
         competitors.append(population[index])
 
     # rank them according to fitness
-    ranked_competitors = hold_tournament(competitors, benchmark[1])
+    ranked_competitors = pool.apply(hold_tournament, args=(competitors, benchmark[1],))
 
     # take 2 best as parents
     parents = [ranked_competitors[0][1], ranked_competitors[1][1]]
@@ -124,7 +124,7 @@ while iterations < args.iterations and best_fitness_value > benchmark[0]:
         # check fitness
         if fitness < best_fitness_value:
             best_fitness_value = fitness
-            best_individual = mutant
+            best_individual = population[index]
 
     iterations += 1
 
