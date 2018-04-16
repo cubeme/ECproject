@@ -1,4 +1,5 @@
 import datetime
+
 import matplotlib.pyplot as plt
 from matplotlib import lines
 
@@ -72,4 +73,4 @@ def plot_individual(individual, hp_sequence):
         line = lines.Line2D([x1, x2], [y1, y2], linewidth=1, color='black')
         ax.add_line(line)
 
-    fig.savefig("plot_best_individual_{}.png".format(datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S-%f')))
+    fig.savefig("plots/plot_best_individual_{}.png".format(datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S-%f')))

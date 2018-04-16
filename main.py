@@ -1,4 +1,5 @@
 import argparse
+import multiprocessing as mp
 
 from crossover_operator import crossover
 from fitness_evaluator import evaluate_fitness
@@ -28,7 +29,7 @@ args = parser.parse_args()
 
 # set parameters
 clash_limit = 20
-m_sys_crossover = 10
+m_sys_crossover = 20
 crossover_rate = 0.8
 in_plane_prob = 0.3
 out_of_plane_prob = 0.3
@@ -38,7 +39,8 @@ kink_prob = 0.3
 # get hp sequence: [total minimum energy, sequence]
 benchmark = read_benchmark_file()[args.benchmark_sequence]
 
-print(benchmark[1])
+print("sequence: " + " ".join(benchmark[1]))
+print("length: {}, minimal energy: {}".format(len(benchmark[1]), benchmark[0]))
 
 population = initialize_population(args.pop_size, len(benchmark[1]))
 
@@ -46,6 +48,9 @@ population = initialize_population(args.pop_size, len(benchmark[1]))
 best = get_best_individual(population, benchmark[1])
 best_fitness_value = best[0]
 best_individual = best[1]
+
+# pool for parallel execution with 4 processes
+pool = mp.Pool(processes=4)
 
 # do GA iterations
 iterations = 0
@@ -67,7 +72,7 @@ while iterations < args.iterations and best_fitness_value > benchmark[0]:
 
     # do crossover with parents
     # returns list with [child_fitness, child] as elements
-    children = crossover(parents, clash_limit, m_sys_crossover, crossover_rate, benchmark[1])
+    children = pool.apply(crossover, args=(parents, clash_limit, m_sys_crossover, crossover_rate, benchmark[1],))
 
     # replace individuals
     # right now there cannot be multiple copies of same individual in the tournament
@@ -105,12 +110,14 @@ while iterations < args.iterations and best_fitness_value > benchmark[0]:
         individuals_to_mutate.append(population[index])
 
     # do mutation
-    mutated_individuals = mutate(individuals_to_mutate, in_plane_prob, out_of_plane_prob, crank_prob, kink_prob,
-                                 clash_limit)
+    mutated_individuals = pool.apply(mutate, args=(individuals_to_mutate, in_plane_prob, out_of_plane_prob,
+                                                   crank_prob, kink_prob, clash_limit,))
+
+    # evaluate fitness of new mutants
+    mutant_fitnesses = [pool.apply(evaluate_fitness, args=(mutant, benchmark[1],)) for mutant in mutated_individuals]
 
     # order in index list and mutated individual list should not have changed
-    for index, mutant in zip(random_mutation_indices, mutated_individuals):
-        fitness = evaluate_fitness(mutant, benchmark[1])
+    for index, fitness, mutant in zip(random_mutation_indices, mutant_fitnesses, mutated_individuals):
         if fitness < best_fitness_value:
             best_fitness_value = fitness
             best_individual = mutant
@@ -123,3 +130,5 @@ while iterations < args.iterations and best_fitness_value > benchmark[0]:
 
 plot_individual(best_individual, benchmark[1])
 print("Energy value: {}".format(best_fitness_value))
+
+# todo: pioneer search, best-, average-, and worst-fitness every 10 generations, do measure and make diagrams, timing
