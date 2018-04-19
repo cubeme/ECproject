@@ -14,7 +14,7 @@ def mutate(individuals_to_mutate, in_plane_prob, out_of_plane_prob, crank_prob, 
                                 in_plane_prob + out_of_plane_prob + crank_prob + kink_prob]
 
     for individual in individuals_to_mutate:
-        mutant = copy.copy(individual)
+        mutant = copy.copy(individual[1])
         clashed = 0
 
         random_number = random.SystemRandom().uniform(0, 1.0)
@@ -39,11 +39,11 @@ def mutate(individuals_to_mutate, in_plane_prob, out_of_plane_prob, crank_prob, 
 
             # if clash occurred, try again to mutate individual
             if check_clash(mutant):
-                mutant = copy.copy(individual)
+                mutant = copy.copy(individual[1])
                 clashed += 1
             else:
                 break
 
-        mutated_individuals.append(mutant)
+        mutated_individuals.append([individual[0], mutant])
 
     return mutated_individuals

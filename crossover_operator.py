@@ -3,9 +3,10 @@ import random
 
 from clash_checker import check_clash
 from fitness_evaluator import evaluate_fitness
+from mutation_operator import mutate
 
 
-def crossover(parents, clash_limit, m_sys_crossover, crossover_rate, hp_sequence):
+def crossover(parents, clash_limit, m_sys_crossover, crossover_rate, hp_sequence, do_mutation=False):
     children = list()
 
     # per iteration two children are added -> 2 * m_sys_crossover children are created in total
@@ -42,10 +43,14 @@ def crossover(parents, clash_limit, m_sys_crossover, crossover_rate, hp_sequence
         if not new_children_created == 2:
             # no child was made, so just reuse both parents
             if new_children_created == 0:
-                children.extend(parents)
+                children.extend(list(parents))
             # one child was made, so reuse first parent
             if new_children_created == 1:
-                children.append(parents[0])
+                children.append(list(parents[0]))
+
+    # do mutation on children
+    if do_mutation:
+        children = mutate(children, 0.4, 0.1, 0.1, 0.4, clash_limit)
 
     # get fitness of all children
     ranked_children = list()

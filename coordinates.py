@@ -1,4 +1,4 @@
-
+# coordinate class for mapping the sequence onto the lattice
 class Coordinate:
     def __init__(self, x, y):
         self.x = x

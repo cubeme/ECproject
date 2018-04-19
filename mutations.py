@@ -1,11 +1,13 @@
 import random
 
 
+# contains possible mutation types
+
 def in_plane_rotation(individual):
     # randomly choose mutation point
     mutation_point = random.randint(0, len(individual) - 1)
 
-    # rotation: 1 -> -90 degrees, 1 -> -180 degrees
+    # rotation: 1 -> -90 degrees, 2 -> -180 degrees
     if individual[mutation_point] == 0:
         new_direction = random.choice([1, 2])
     # rotation: 0 -> +90 degrees, 2 -> -90 degrees
