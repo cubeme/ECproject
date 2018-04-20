@@ -55,7 +55,7 @@ result_keeper = ResultKeeper(benchmark[1], length=len(benchmark[1]), energy=benc
 print("sequence: " + " ".join(benchmark[1]))
 
 # identifying string for creating a folder for output files
-identifier = "results/sequence_{}_pop_{}_lambda_{}/".format(args.benchmark_sequence,
+identifier = "results/sequence_{}_pop_{}_lambda_{}_test/".format(args.benchmark_sequence,
                                                             args.pop_size,
                                                             args.mut_lambda)
 # initialize the result keeper

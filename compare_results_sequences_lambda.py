@@ -119,6 +119,18 @@ sequences_lambda_40 = [statistics.mean([item[0] for item in file_0_500_40]),
                        statistics.mean([item[0] for item in file_6_500_40]),
                        statistics.mean([item[0] for item in file_7_500_40])]
 
+sequences_lambda_40_time = [statistics.mean([item[1] for item in file_0_500_40]),
+                            statistics.mean([item[1] for item in file_1_500_40]),
+                            statistics.mean([item[1] for item in file_2_500_40]),
+                            statistics.mean([item[1] for item in file_3_500_40]),
+                            statistics.mean([item[1] for item in file_4_500_40]),
+                            statistics.mean([item[1] for item in file_5_500_40]),
+                            statistics.mean([item[1] for item in file_6_500_40]),
+                            statistics.mean([item[1] for item in file_7_500_40])]
+print("Average time 40:")
+for i in range(8):
+    print("Sequence: {}, Time: {}".format(i, sequences_lambda_40_time[i]))
+
 sequences_lambda_50 = [statistics.mean([item[0] for item in file_0_500_50]),
                        statistics.mean([item[0] for item in file_1_500_50]),
                        statistics.mean([item[0] for item in file_2_500_50]),
@@ -127,6 +139,19 @@ sequences_lambda_50 = [statistics.mean([item[0] for item in file_0_500_50]),
                        statistics.mean([item[0] for item in file_5_500_50]),
                        statistics.mean([item[0] for item in file_6_500_50]),
                        statistics.mean([item[0] for item in file_7_500_50])]
+
+sequences_lambda_50_time = [statistics.mean([item[1] for item in file_0_500_50]),
+                            statistics.mean([item[1] for item in file_1_500_50]),
+                            statistics.mean([item[1] for item in file_2_500_50]),
+                            statistics.mean([item[1] for item in file_3_500_50]),
+                            statistics.mean([item[1] for item in file_4_500_50]),
+                            statistics.mean([item[1] for item in file_5_500_50]),
+                            statistics.mean([item[1] for item in file_6_500_50]),
+                            statistics.mean([item[1] for item in file_7_500_50])]
+
+print("Average time 50:")
+for i in range(8):
+    print("Sequence: {}, Time: {}".format(i, sequences_lambda_50_time[i]))
 
 groups = [sequences_lambda_30, sequences_lambda_40, sequences_lambda_50]
 column_label = ['lambda=30', 'lambda=40', 'lambda=50']

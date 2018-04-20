@@ -1,7 +1,5 @@
 import statistics
 
-from scipy import stats
-
 from IO_handler import write_results_to_file
 from plotter import plot_fitness_progression, plot_individual
 
@@ -65,15 +63,12 @@ class ResultKeeper:
 
     def finalize_result_writer(self, runs, results):
         self.result_writer.append(
-            "\nEnergy value ({} runs)\n\tBest: {}\n\tMean: {}\n\tSD: {}\n\tT-test: {}".format(runs,
-                                                                                              min(results),
-                                                                                              statistics.mean(
-                                                                                                  results),
-                                                                                              statistics.pstdev(
-                                                                                                  results),
-                                                                                              stats.ttest_1samp(
-                                                                                                  results,
-                                                                                                  0)))
+            "\nEnergy value ({} runs)\n\tBest: {}\n\tMean: {}\n\tSD: {}".format(runs,
+                                                                                min(results),
+                                                                                statistics.mean(
+                                                                                    results),
+                                                                                statistics.pstdev(
+                                                                                    results)))
 
     def start_compare_writer(self):
         self.result_to_compare = ["{:3}\t{:4}\t{:15}\n".format("Run", "Best", "Time")]
